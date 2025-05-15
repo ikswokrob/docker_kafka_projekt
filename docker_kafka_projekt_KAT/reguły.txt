@@ -1,23 +1,41 @@
 Reguły decyzyjne:
 
 1. Jeśli userid występuje po raz pierwszy pokaż popup : “Zarejestruj się i odbierz 10% zniżki na pierwsze zamówienie”
-2. Jeśli dodał produkty do koszyka i przez x minut nic z tym nie robi wyświetl “Dokończ zakupy i odbierz darmową dostawę / rabat 5%”
+2. Jeśli dodał produkty do koszyka i przez 10 minut nic z tym nie robi wyświetl “Dokończ zakupy i odbierz darmową dostawę / rabat 5%”
 3. Jeśli dodał coś do koszyka a potem wyjmuje pokaż komunikat “-10% na pierwszy zakup” 
 
+# - current_time: aktualny timestamp (np. datetime.now())
+# - event_type: typ zdarzenia ("cart_add", "cart_remove", "view", itd.)
+# - user_id: identyfikator użytkownika
+# - seen_users: zbiór zarejestrowanych/znanych użytkowników
+# - cart_activity: słownik aktywności w koszyku
+# - REMINDER_DELAY: REMINDER_DELAY = timedelta(minutes=10)
 
 # Reguła 1: nowy użytkownik
-    if user_id not in seen_users:
-        print(f"Popup dla nowego usera {user_id}: 'Zarejestruj się i odbierz 10% zniżki!'")
-        seen_users.add(user_id)
+if user_id not in seen_users:
+    print(f"Popup dla nowego usera {user_id}: 'Zarejestruj się i odbierz 10% zniżki!'")
+    seen_users.add(user_id)
 
 # Reguła 2: dodanie do koszyka
-    if event_type == "cart":
-        cart_activity[user_id] = {"last_cart_time": current_time, "reminder_sent": False}
+if event_type == "cart_add":
+    cart_activity[user_id] = {
+        "last_cart_time": current_time,
+        "reminder_sent": False,
+        "has_cart_items": True
+    }
 
-# Reguła 3: przypomnienie o dokończeniu zakupów
-    if event_type != "cart" and user_id in cart_activity:
-        last_cart_time = cart_activity[user_id]["last_cart_time"]
-        reminder_sent = cart_activity[user_id]["reminder_sent"]
-        if not reminder_sent and (current_time - last_cart_time) > REMINDER_DELAY:
-            print(f"Przypomnienie dla usera {user_id}: 'Dokończ zakupy i odbierz rabat 5%'")
-            cart_activity[user_id]["reminder_sent"] = True
+# Reguła 3: wyjęcie produktu z koszyka
+elif event_type == "cart_remove" and user_id in cart_activity:
+    cart_activity[user_id]["has_cart_items"] = False
+    print(f"Użytkownik {user_id} wyjął produkt z koszyka. Wyświetl: '-10% na pierwszy zakup'")
+
+# Reguła 4: przypomnienie o porzuconym koszyku
+elif user_id in cart_activity:
+    last_cart_time = cart_activity[user_id]["last_cart_time"]
+    reminder_sent = cart_activity[user_id]["reminder_sent"]
+    has_items = cart_activity[user_id].get("has_cart_items", False)
+
+    if has_items and not reminder_sent and (current_time - last_cart_time) > REMINDER_DELAY:
+        print(f"Przypomnienie dla usera {user_id}: 'Dokończ zakupy i odbierz rabat 5%'")
+        cart_activity[user_id]["reminder_sent"] = True
+

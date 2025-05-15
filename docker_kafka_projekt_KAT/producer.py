@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import time
 
-#  Serializacja specjalnych typów (np. datetime, Decimal)
+#Serializacja specjalnych typów (np. datetime, Decimal)
 def serialize(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
@@ -14,7 +14,7 @@ def serialize(obj):
         return float(obj)
     return obj
 
-# 🔌 Połączenie z Kafka z retry
+#Połączenie z Kafka z retry
 producer = None
 for i in range(10):
     try:
@@ -31,7 +31,7 @@ for i in range(10):
 if producer is None:
     raise Exception("❌ Nie udało się połączyć z Kafka po 10 próbach")
 
-# 🔌 Połączenie z Postgres
+#Połączenie z Postgres
 conn = psycopg2.connect(
     host="pg_kafka",           # nazwa kontenera Postgresa
     database="kafka_database",
@@ -40,7 +40,7 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-# 📥 Pobieranie danych z bazy
+#Pobieranie danych z bazy
 cur.execute("SELECT * FROM kafka_dane ORDER BY event_time ASC LIMIT 1000;")
 rows = cur.fetchall()
 cols = [desc[0] for desc in cur.description]

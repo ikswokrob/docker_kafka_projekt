@@ -1,0 +1,28 @@
+1. Początek - build
+
+> docker-compose up --build
+
+2. Usunięcie buildu dockera
+> docker-compose down -v
+
+3. Uruchom kontenery (bez buildu)
+
+> docker-compose up -d
+
+4. Zamknij kontenery (bez de-buildu)
+
+> docker-compose down
+
+5. Sprawdź co działa:
+
+> docker ps
+
+6. Załaduj dane do tabeli:
+
+> docker-compose --profile loader up loader
+
+7. Baza danych admin
+
+http://localhost:5050/
+
+
